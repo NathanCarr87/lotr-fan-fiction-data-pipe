@@ -4,6 +4,7 @@ beautifulsoup4
 lxml
 undetected-chromedriver
 pandas
+pandarallel
 
 
 # more to come

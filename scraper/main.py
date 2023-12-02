@@ -4,11 +4,12 @@ from multiprocessing.pool import ThreadPool
 
 from bs4 import BeautifulSoup
 
-
+columns = ["on-story-preview href","fixed-ratio src","story-rank","title","username","username href","read-count","vote-count","part-count","description","tag-item","tag-item href","tag-item 2","tag-item href 2","tag-item 3","tag-item href 3","num-not-shown","label"
+]
 def wattapad2():
     print("Starting Wattapad")
 
-    df = pd.read_csv("/Users/sarahcarr/Projects/data_science/lotr_data_pipe/data/lotr.csv")
+    df = pd.read_csv("/Users/sarahcarr/Projects/data_science/lotr_data_pipe/data/lotr.csv", names=columns)
     print(len(df))
  
     with ThreadPool() as pool:
@@ -29,7 +30,9 @@ def wattapad_subpage(row):
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
     }
     print(href)
+    print(href[30:href.find('-')])
     ps = []
+    save_ps = []
     re = requests.get(href, headers=headers)
     soup = BeautifulSoup(re.text, 'lxml')
     a = soup.find("a", class_="read-btn")
@@ -40,15 +43,22 @@ def wattapad_subpage(row):
     while subpage:
         ind += 1
         soup3 = BeautifulSoup(req.text, 'lxml')
-        ps.extend(soup3.find_all("p"))
+        ps.extend(soup3.find_all("p", class_=""))
         advance_button = soup3.find("a", class_="btn__Qzch5")
         if not advance_button:
             subpage = False
             continue
         else:
             req = requests.get(advance_button['href'], headers=headers)
-    f = open("/Users/sarahcarr/Projects/data_science/lotr_data_pipe/data/lotr/"  +href[40:50]+"-"+str(ind)+ "-scrape.txt", "w")
-    f.write(str(ps))
-    f.close()    
+
+   
+
+    for p in ps:
+        save_ps.append(p.getText())
+    row[1]['text'] = ' '.join(save_ps)
+    df = pd.Series(row[1])
+    # f = open("/Users/sarahcarr/Projects/data_science/lotr_data_pipe/data/lotrs/"  +href[40:50]+"-"+str(ind)+ "-scrape.json", "w")
+    df.to_json("/Users/sarahcarr/Projects/data_science/lotr_data_pipe/data/lotrs/"  +href[40:50]+"-"+str(ind)+ "-scrape.json")
+    # f.close()    
 
 wattapad2()

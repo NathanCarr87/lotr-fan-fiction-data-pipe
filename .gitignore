@@ -1,5 +1,6 @@
-data/lotr/
+data/
 
+pipe/tmp*
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
